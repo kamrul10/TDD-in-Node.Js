@@ -1,0 +1,63 @@
+version: "3.3"
+
+services:
+  # db:
+  #   image: postgres
+  #   environment:
+  #     - POSTGRES_DB=postgres
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+
+  # redis:
+  #   restart: always
+  #   image: redis:5-alpine
+  #   expose:
+  #     - "6379"
+  #   ports:
+  #     - "6379:6379"
+
+  # rabbitmq:
+  #   restart: always
+  #   image: rabbitmq:3.8.17-management-alpine
+  #   container_name: rabbitmq
+  #   # command: sh -c "rabbitmq-plugins enable rabbitmq_management"
+  #   volumes:
+  #     - ./.docker/rabbitmq/etc/:/etc/rabbitmq/
+  #     - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
+  #     - ./.docker/rabbitmq/logs/:/var/log/rabbitmq/
+  #   environment:
+  #     RABBITMQ_ERLANG_COOKIE: aqswdefr
+  #     RABBITMQ_DEFAULT_USER: guest
+  #     RABBITMQ_DEFAULT_PASS: guest
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+
+  db:
+    container_name: mongodb
+    image: mongo:4.4.6
+    volumes:
+      - ~/mongo:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=product_user
+      - MONGO_INITDB_ROOT_PASSWORD=aqswdefr
+      - MONGO_INITDB_DATABASE=admin
+  app:
+    build: .
+    command: npm run dev
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  # worker:
+  #   build: .
+  #   depends_on:
+  #     - redis
+  #   volumes:
+  #     - .:/app
+  #   command: bash -c "celery -A evaly worker -l info"
